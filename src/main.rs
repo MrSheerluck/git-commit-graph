@@ -1,6 +1,6 @@
 use flate2::read::ZlibDecoder;
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Read;
 use std::path::Path;
@@ -252,6 +252,8 @@ fn render_graph(
         .collect();
 
     let main_line = walk_first_parent_chain(nodes, head_hash);
+    let main_set: HashSet<&str> =
+        main_line.iter().map(|h| h.as_str()).collect();
     let mut shown: HashMap<String, bool> = HashMap::new();
 
     for hash in &main_line {
@@ -273,6 +275,9 @@ fn render_graph(
 
                     println!("|\\");
                     for side_hash in &side_line {
+                        if main_set.contains(side_hash.as_str()) {
+                            break;
+                        }
                         let label = branch_map
                             .get(side_hash.as_str())
                             .map(|name| format!(" ({})", name))
